@@ -1,0 +1,20 @@
+<div class="row columns" style="float: right">
+  <button (click)="login()" *ngIf="!name">Login</button> &nbsp;&nbsp;&nbsp;
+  <button (click)="logout()" *ngIf="name">Logout</button>&nbsp;&nbsp;&nbsp;
+  <!-- <button (click)="getChat()" *ngIf="!name">create Room</button> -->
+</div>
+<div class="row columns" *ngIf="hideFrnds">
+  <div class="chat-container" *ngFor="let e of emailsArray">
+    <a href="javascript:void(0)" (click)="getUrFriend(e.email, e.id)">{{e.email}}</a>
+  </div>
+</div>
+
+<div class="row columns" *ngIf="name && !hideFrnds">
+  <div class="chat-container" *ngFor="let item of items">
+    <a href="#">{{item.senderName}}</a>
+
+    <p>{{item.msg}}</p>
+  </div>
+  <input type="text" id="message" name="msg" placeholder="Chat here..." (keyup.enter)="chatProceed($event.target.value)" [(ngModel)]="msgVal"
+  />
+</div>

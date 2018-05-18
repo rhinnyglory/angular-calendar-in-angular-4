@@ -1,293 +1,96 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  ViewChild,
-  TemplateRef,
-  OnInit,
-  Input
-} from '@angular/core';
-import {
-  startOfDay,
-  endOfDay,
-  subDays,
-  addDays,
-  endOfMonth,
-  isSameDay,
-  isSameMonth,
-  addHours
-} from 'date-fns';
-import { Subject } from 'rxjs/Subject';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import {
-  CalendarEvent,
-  CalendarEventAction,
-  CalendarEventTimesChangedEvent
-} from 'angular-calendar';
-import { DatePipe } from '@angular/common';
-
-import { EventService } from './demo-utils/event.service';
-import { EventsTypes } from './events';
-
-const colors: any = {
-  red: {
-    primary: '#ad2121',
-    secondary: '#FAE3E3'
-  },
-  blue: {
-    primary: '#1e90ff',
-    secondary: '#D1E8FF'
-  },
-  yellow: {
-    primary: '#e3bc08',
-    secondary: '#FDF1BA'
-  }
-};
+import { Component, OnInit, OnDestroy, Input, AfterViewInit, ElementRef, Renderer2, ViewChild } from '@angular/core';
+import { ActivatedRouteSnapshot, ActivatedRoute, RouterStateSnapshot, Router, NavigationEnd } from '@angular/router';
+import { AngularFireAuth } from 'angularfire2/auth';
+import { LoginServices } from './home-login/login.services';
+declare var jquery: any;
+declare var $: any;
 
 @Component({
-  // moduleId: __moduleName,
-  selector: 'mwl-demo-component',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  styleUrls: ['./app.component.css'],
-  templateUrl: './app.component.html'
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit {
-  @ViewChild('modalContent') modalContent: TemplateRef<any>;
-  @ViewChild('addEvents') addEvents: TemplateRef<any>;
-  view = 'month';
-  datePipe = new DatePipe('en-US');
 
-  viewDate: Date = new Date();
+export class AppComponent implements OnInit, OnDestroy {
+  url: string;
+  haha: any;
+  windHeight: any;
+  showDashboard = true;
+  public loading = false;
+  body: HTMLBodyElement = document.getElementsByTagName('body')[0];
+  @Input() authentication: boolean;
 
-  modalData: {
-    action: string;
-    event: CalendarEvent;
-  };
-
-  actions: CalendarEventAction[] = [
-    {
-      label: '<i class="fa fa-fw fa-pencil"></i>',
-      onClick: ({ event }: { event: CalendarEvent }): void => {
-        this.handleEvent('Edited', event, '');
-      }
-    },
-    {
-      label: '<i class="fa fa-fw fa-times"></i>',
-      onClick: ({ event }: { event: CalendarEvent }): void => {
-        this.events = this.events.filter(iEvent => iEvent !== event);
-        this.handleEvent('Deleted', event, '');
-      }
-    }
-  ];
-
-  refresh: Subject<any> = new Subject();
-  newEve = {
-    eTitle: '',
-    ePrimaryColor: '',
-    eSecondaryColor: '',
-    color: {
-      primary: '',
-      secondary: ''
-    },
-    eStartDate: '',
-    eEndDate: '',
-    eAgencyId: 1,
-    eModelId: 4,
-    eClientId: 3,
-    createdBy: 2,
-    eLocation: '',
-    eStartTime: '',
-    eEndTime: ''
-  };
-  getEves: CalendarEvent[] = [];
-  events: CalendarEvent[] = [];
-  activeDayIsOpen: boolean = true;
-  ngOnInit() {
-    this.getEvents();
-  }
-  constructor(private modal: NgbModal, private eve: EventService) { }
-
-  getEvents() {
-    this.eve.getEves().then(users => {
-      users.data.forEach(obj => {
-        const data = {
-          id: obj.eId,
-          start: startOfDay(obj.eStartDate),
-          end: addDays(obj.eEndDate, 0),
-          title: obj.eTitle,
-          color: {
-            primary: obj.ePrimaryColor,
-            secondary: obj.eSecondaryColor
-          },
-          actions: this.actions
-        };
-        this.events.push(data);
-      });
-      this.view = 'month';
-      this.refresh.next();
-    });
-  }
-
-  dayClicked({ date, events }: { date: Date; events: CalendarEvent[] }): void {
-    if (isSameMonth(date, this.viewDate)) {
-      if (
-        (isSameDay(this.viewDate, date) && this.activeDayIsOpen === true) ||
-        events.length === 0
-      ) {
-        this.activeDayIsOpen = false;
-      } else {
-        this.activeDayIsOpen = true;
-        this.viewDate = date;
-      }
-    }
-  }
-
-  eventTimesChanged({
-    event,
-    newStart,
-    newEnd
-  }: CalendarEventTimesChangedEvent): void {
-    event.start = newStart;
-    event.end = newEnd;
-    this.handleEvent('Dropped or resized', event, '');
-    this.refresh.next();
-  }
-
-  handleEvent(action: string, event: CalendarEvent, events): void {
-    this.eve.getEveData(event.id).then(data => {
-      this.newEve = data.data;
-      this.newEve.eStartDate = this.datePipe.transform(this.newEve.eStartDate, 'yyyy-MM-dd');
-      this.newEve.eEndDate = this.datePipe.transform(this.newEve.eEndDate, 'yyyy-MM-dd');
-      console.log(this.newEve, '456');
-    }).catch(err => {
-      console.log(err, '456');
-    });
-    this.modalData = { event, action };
-    this.modal.open(this.modalContent, { size: 'lg' });
-  }
-
-  addCalendarEvent(): void {
-    this.newEve = {
-      eTitle: '',
-      ePrimaryColor: '',
-      eSecondaryColor: '',
-      color: {
-        primary: '',
-        secondary: ''
-      },
-      eStartDate: '',
-      eEndDate: '',
-      eAgencyId: 1,
-      eModelId: 4,
-      eClientId: 3,
-      createdBy: 2,
-      eLocation: '',
-      eStartTime: '',
-      eEndTime: ''
-    };
-    this.modal.open(this.addEvents, { size: 'lg' });
-  }
-
-  addNewEvent(): void {
-    this.events.push({
-      title: this.newEve.eTitle,
-      start: startOfDay(this.newEve.eStartDate),
-      end: endOfDay(this.newEve.eEndDate),
-      color: this.newEve.color,
-      draggable: true,
-      resizable: {
-        beforeStart: true,
-        afterEnd: true
-      }
-    });
-    this.eve.creatEvent(this.newEve).then(data => {
-      console.log(data);
-    }).catch(err => {
-      console.log(err);
-    });
-    this.refresh.next();
-  }
-
-  updateEvent() {
-    this.eve.updateEvent(this.newEve).then(data => {
-      console.log(data);
-      const dataupdate = {
-        primary: this.newEve.ePrimaryColor,
-        secondary: this.newEve.eSecondaryColor,
-      };
-      this.events.filter(eve => {
-        if (eve.id === data.data.id) {
-          eve.color = dataupdate;
-          eve.title = this.newEve.eTitle;
-          eve.start = startOfDay(this.newEve.eStartDate);
-          eve.end = endOfDay(this.newEve.eEndDate);
+  constructor(private element: ElementRef,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private log: LoginServices,
+    private afAuth: AngularFireAuth) {
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        if (event.url === '/login') {
+          this.showDashboard = false;
+        } else {
+          this.showDashboard = true;
         }
-        this.refresh.next();
-      });
-    }).catch(err => {
-      console.log(err);
+      }
+
+      setTimeout(function () {
+        // Remove overflow from .wrapper if layout-boxed exists
+        $('.layout-boxed > .wrapper').css('overflow', 'hidden');
+        // Get window height and the wrapper height
+        const footer_height = $('.main-footer').outerHeight() || 0;
+        const neg = $('.main-header').outerHeight() + footer_height;
+        const window_height = $(window).height();
+        const sidebar_height = $('.sidebar').height() || 0;
+        // Set the min-height of the content and sidebar based on the
+        // the height of the document.
+
+        if ($('body').hasClass('fixed')) {
+          $('.content-wrapper, .right-side').css('min-height', window_height - footer_height);
+        } else {
+          let postSetWidth;
+          if (window_height >= sidebar_height) {
+            $('.content-wrapper, .right-side').css('min-height', window_height - neg);
+            postSetWidth = window_height - neg;
+          } else {
+            $('.content-wrapper, .right-side').css('min-height', sidebar_height);
+            postSetWidth = sidebar_height;
+          }
+
+          // Fix for the control sidebar height
+          // const controlSidebar = $($.AdminLTE.options.controlSidebarOptions.selector);
+          // if (typeof controlSidebar !== 'undefined') {
+          //   if (controlSidebar.height() > postSetWidth) {
+          //     $('.content-wrapper, .right-side').css('min-height', controlSidebar.height());
+          //   }
+
+          // }
+
+        }
+
+      }, 10);
+
     });
-    this.refresh.next();
+    // this.haha = this.element.nativeElement;
+    // this.loading = true;
+    // this.haha.style.height = '100%';
+    // this.windHeight = (window.screen.height) + 'px';
+
   }
 
-  deleteEvent(id: any) {
-    this.eve.delEveData(id).then(data => {
-      const delEve = this.events.filter(
-        eve => eve.id === id);
-      const index = this.events.indexOf(delEve[0]);
-      this.events.splice(index, 1);
-      this.refresh.next();
-    }).catch(err => {
-      console.log(err);
-    });
+  ngOnInit() {
+    this.body.classList.add('skin-blue');
+    this.body.classList.add('sidebar-mini');
+  }
+
+  ngOnDestroy() {
+    // remove the the body classes
+    this.body.classList.remove('skin-blue');
+    this.body.classList.remove('sidebar-mini');
+  }
+
+  logout() {
+    this.log.logout();
+    this.afAuth.auth.signOut();
   }
 }
-
-
-// addEvent(): void {
-//   this.events.push({
-//     title: 'New event',
-//     start: startOfDay(new Date()),
-//     end: endOfDay(new Date()),
-//     color: colors.red,
-//     draggable: true,
-//     resizable: {
-//       beforeStart: true,
-//       afterEnd: true
-//     }
-//   });
-//   this.refresh.next();
-// }
-
-// this.events = [
-    //   {
-    //     start: startOfDay(new Date()),
-    //     end: addDays(new Date(), 1),
-    //     title: 'A 3 day event',
-    //     color: colors.red,
-    //     actions: this.actions
-    //   },
-    //   {
-    //     start: startOfDay(new Date()),
-    //     title: 'An event with no end date',
-    //     color: colors.yellow,
-    //     actions: this.actions
-    //   },
-    //   {
-    //     start: subDays(endOfMonth(new Date()), 3),
-    //     end: addDays(endOfMonth(new Date()), 3),
-    //     title: 'A long event that spans 2 months',
-    //     color: colors.blue
-    //   },
-    //   {
-    //     start: addHours(startOfDay(new Date()), 2),
-    //     end: new Date(),
-    //     title: 'A draggable and resizable event',
-    //     color: colors.yellow,
-    //     actions: this.actions,
-    //     resizable: {
-    //       beforeStart: true,
-    //       afterEnd: true
-    //     },
-    //     draggable: true
-    //   }
-    // ];

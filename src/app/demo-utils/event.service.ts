@@ -23,5 +23,17 @@ export class EventService {
   updateEvent(params: object) {
     return this.httpcaller.httpcall('front/v1/update-event', 'put', params);
   }
+
+  getUsers() {
+    return this.httpcaller.httpcall('front/v1/user-details', 'get', {});
+  }
+
+  getUserData(id: any) {
+    return this.httpcaller.httpcall('front/v1/user/' + id, 'get', {});
+  }
+
+  getChatHistory() {
+    return this.httpcaller.chatHistory('https://my-project-1475153076448.firebaseio.com/chatRoom.json', 'get', {});
+  }
 }
 

@@ -12,25 +12,32 @@ export class HttpService {
     const header = new Headers({
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
-      'x-access-token': 'eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoic3VwZXJhZG1pbkBnbWFpbC5jb20iLCJuYW1lIjoic3VwZXIgYWRtaW4iLCJyb2xlSWQiOjF9.WolIQhqXH9M0MDR4WpjIFfDL0DyfVKbtlnSkGR8TgJ8'
+      'x-access-token': localStorage.getItem('auth')
     });
     const options = new RequestOptions({ headers: header });
     if (method !== 'put' && method !== 'post') {
-      return this.http[method]('http://192.168.1.44:3030/' + url, options, data)
+      return this.http[method]('http://192.168.1.201:3030/' + url, options, data)
         .toPromise()
         .then(this.extractData)
         .catch(this.handleError);
     } else {
-      return this.http[method]('http://192.168.1.44:3030/' + url, data, options)
+      return this.http[method]('http://192.168.1.201:3030/' + url, data, options)
         .toPromise()
         .then(this.extractData)
         .catch(this.handleError);
     }
   }
 
+  chatHistory(url: string, method: string, data?: any) {
+      return this.http[method](url, data)
+        .toPromise()
+        .then(this.extractData)
+        .catch(this.handleError);
+  }
+
   private extractData(res: Response) {
     const body = res.json();
-    return body || {};
+    return Promise.resolve(body || {});
   }
 
   private handleError(error: any): Promise<any> {
@@ -38,16 +45,4 @@ export class HttpService {
   }
 }
 
-// @Injectable()
-// export class MessageService {
-//     private _listners = new Subject<any>();
-
-//     listen(): Observable<any> {
-//        return this._listners.asObservable();
-//     }
-
-//     filter(filterBy: any) {
-//        this._listners.next(filterBy);
-//     }
-// }
 

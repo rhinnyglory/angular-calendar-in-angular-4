@@ -1,0 +1,54 @@
+div.rpo-login {
+    padding-top: 15px;
+    img.logo {
+      display: block;
+      margin: auto;
+      width: inherit;
+      height: 140px;
+    }
+    .box {
+      opacity: 1;
+      padding: 50px;
+      border-width: 1px;
+      border-radius: 2px;
+      border-color: #d5e1e8;
+      border-style: solid;
+      background-color: #f4f8f9;
+      background-image: none;
+      background-size: auto;
+      background-repeat: repeat;
+      background-position: center center;
+      box-shadow: #eaeaea 1px 1px 10px;
+      span {
+        color: #0553FC;
+        font-size: 26px;
+        font-weight: 300;
+      }
+      .form-group {
+        // padding-bottom: 20px;
+        margin-bottom: 20px;
+      }
+      input {
+        opacity: 1;
+        background-color: rgb(255, 255, 255);
+        border-color: rgb(221, 221, 221);
+        border-width: 1px;
+        color: rgb(102, 102, 102);
+        padding: 0px 10px;
+        text-align: left;
+        font-size: 22px;
+        border-radius: 2px;
+        border-style: solid;
+        background-size: auto;
+        background-repeat: repeat;
+        background-position: center center;
+        height: 52px;
+      }
+      // button[type="submit"] {
+      //   border-radius: 0px;
+      //   background-color: #000;
+      //   color: #fff;
+      //   padding: 10px 50px;
+      // }
+    }
+  }
